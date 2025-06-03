@@ -1,14 +1,15 @@
 @file:Suppress("UnstableApiUsage")
 
+import com.android.build.api.variant.FilterConfiguration.FilterType.ABI
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 import com.github.willir.rust.CargoNdkBuildTask
+import java.io.ByteArrayOutputStream
 import org.jetbrains.kotlin.konan.properties.hasProperty
 import org.jetbrains.kotlin.konan.properties.propertyList
-import com.android.build.api.variant.FilterConfiguration.FilterType.*
-import java.io.ByteArrayOutputStream
 
 val localProperties = gradleLocalProperties(rootDir, providers)
-val abiFilterList = ((localProperties["ABI_FILTERS"] ?: properties["ABI_FILTERS"]) as? String)?.split(';')
+val abiFilterList = ((localProperties["ABI_FILTERS"] ?: properties["ABI_FILTERS"]) as? String)
+    ?.split(';')
 val abiCodes = mapOf("arm64-v8a" to 1, "armeabi-v7a" to 2, "x86_64" to 3, "x86" to 4)
 
 abstract class GitTagTask @Inject constructor(
@@ -23,13 +24,12 @@ abstract class GitTagTask @Inject constructor(
             }
             output.toString().trim()
         } catch (e: Exception) {
-            ""
+            "0"
         }
     }
 }
 
 val tag = project.objects.newInstance<GitTagTask>().getGitTag()
-val tagSuffix = ".$tag"
 
 plugins {
     alias(libs.plugins.androidApplication)
@@ -47,7 +47,7 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = 1 + tag.toInt()
-        versionName = "1.0$tagSuffix"
+        versionName = "1.0.$tag"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
